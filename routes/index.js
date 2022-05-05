@@ -1,15 +1,18 @@
 const express = require("express");
 const routes = express();
 const mongoose = require("mongoose");
-const contactSchema = require("../react-form/model/contact");
+const Contact = require("../model/contact");
 
-const Contact = mongoose.model("Contact", contactSchema);
-
-routes.get("/", (req, res) => {
-  Contact.find()
-    .then((contact) => res.json(contact))
-    .catch((err) => res.status(400).json(err));
+routes.get("/contacts", async (req, res) => {
+  const findContact = await Contact.find();
+  res.status(201).json({ success: true, data: findContact });
 });
+// routes.get("/contacts", (req, res) => {
+//   console.log(Contact);
+//   Contact.find()
+//     .then((contact) => res.json(contact))
+//     .catch((err) => res.status(400).json(err));
+// });
 
 routes.post("/newContact", (req, res) => {
   const newContact = new Contact({
