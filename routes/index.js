@@ -14,16 +14,30 @@ routes.get("/contacts", async (req, res) => {
 //     .catch((err) => res.status(400).json(err));
 // });
 
-routes.post("/newContact", (req, res) => {
+routes.post("/newContact", async (req, res) => {
   const newContact = new Contact({
     name: req.body.name,
     descr: req.body.descr,
     number: req.body.number,
   });
-  newContact
-    .save()
-    .then((contact) => console.log(contact))
-    .catch((err) => res.status(400).json(err));
+  newContact.save();
+
+  const findContact = await Contact.find();
+  res.status(201).json({ success: true, data: findContact });
+});
+
+routes.delete("/delete/:id", async (req, res) => {
+  const id = req.params.id;
+  Contact.findByIdAndDelete({ _id: id }, (req, res, err) => {
+    if (!err) {
+      console.log("Deleted");
+    } else {
+      console.log(err);
+    }
+  });
+
+  const findContact = await Contact.find();
+  res.status(201).json({ success: true, data: findContact });
 });
 
 module.exports = routes;

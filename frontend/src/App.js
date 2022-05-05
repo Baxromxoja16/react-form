@@ -5,6 +5,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Contacts from "./Components/Contacts";
+import Loader from "./Components/Loader/Loader";
 
 function App() {
   const [loading, setLoading] = useState(false);
@@ -21,6 +22,13 @@ function App() {
       number: "",
     },
   ]);
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [updateContact, setUpdateContact] = useState({
+    name: "",
+    number: "",
+    descr: "",
+    id: "",
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,9 +53,23 @@ function App() {
       name: "",
       descr: "",
       number: "",
+      _id: "",
     });
     toast.success("Contact student");
-    await axios.post("/newContact", newContact);
+    const { data } = await axios.post("/newContact", newContact);
+    setContacts(data.data);
+  };
+
+  const updateHandler = async (id) => {
+    setIsUpdate(true);
+
+    console.log('update')
+    // setUpdateContact((prev) => {
+    //   return {
+    //     ...prev,
+    //     id: id,
+    //   };
+    // });
   };
 
   useEffect(() => {
@@ -61,62 +83,73 @@ function App() {
     find();
   }, []);
 
+  const deleteContact = async (id) => {
+    const { data } = await axios.delete("http://localhost:5000/delete/" + id);
+    setContacts(data.data);
+    toast.success("Delete contact");
+  };
+
   return (
     <>
       <ToastContainer />
       <Navbar />
       {loading ? (
-        <h1>Loading...</h1>
+        <Loader />
       ) : (
-        <form className="w-50 m-auto  ">
-          <div className="mb-3">
-            <label htmlFor="name" className="form-label">
-              Enter your name
-            </label>
-            <input
-              onChange={handleChange}
-              value={contact.name}
-              name="name"
-              type="text"
-              className="form-control"
-              id="name"
-            />
-            <div id="emailHelp" className="form-text">
-              We'll never share your email with anyone else.
+        <>
+          <form className="w-50 m-auto  ">
+            <div className="mb-3">
+              <label htmlFor="name" className="form-label">
+                Enter your name
+              </label>
+              <input
+                onChange={handleChange}
+                value={contact.name}
+                name="name"
+                type="text"
+                className="form-control"
+                id="name"
+              />
+              <div id="emailHelp" className="form-text">
+                We'll never share your email with anyone else.
+              </div>
             </div>
-          </div>
-          <div className="mb-3">
-            <label htmlFor="number" className="form-label">
-              Your number
-            </label>
-            <input
-              onChange={handleChange}
-              value={contact.number}
-              name="number"
-              type="number"
-              className="form-control"
-              id="number"
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="descr" className="form-label">
-              Description
-            </label>
-            <textarea
-              onChange={handleChange}
-              value={contact.descr}
-              className="form-control"
-              name="descr"
-              id="descr"
-            ></textarea>
-          </div>
-          <button onClick={submitHandler} className="btn btn-primary">
-            Submit
-          </button>
-        </form>
+            <div className="mb-3">
+              <label htmlFor="number" className="form-label">
+                Your number
+              </label>
+              <input
+                onChange={handleChange}
+                value={contact.number}
+                name="number"
+                type="number"
+                className="form-control"
+                id="number"
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="descr" className="form-label">
+                Description
+              </label>
+              <textarea
+                onChange={handleChange}
+                value={contact.descr}
+                className="form-control"
+                name="descr"
+                id="descr"
+              ></textarea>
+            </div>
+            <button onClick={submitHandler} className="btn btn-primary">
+              Submit
+            </button>
+          </form>
+          <Contacts
+            updateHandler={updateHandler}
+            deleteContact={deleteContact}
+            contacts={contacts}
+          />
+        </>
       )}
-
-      <Contacts contacts={contacts} />
     </>
   );
 }
